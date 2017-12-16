@@ -35,5 +35,3 @@ for num in range(cases_count):
             taken = taken | suitable
 
     print(cases)
-
-# if __name__ == "__main__":
