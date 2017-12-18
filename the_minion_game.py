@@ -19,21 +19,9 @@
 
 # Using KMP algorithm to find substrings in a string
 #
-# VOWELS = "AEIOU"
-# PLAYER1 = 'Kevin'
-# PLAYER2 = 'Stuart'
-#
-# input_word = input()
-# counted = set()
-# length = len(input_word)
-# result = {PLAYER1: 0, PLAYER2: 0}
-
-"BANANABANAN"
-# B
-# BA
-# BAN
-# BANA
-
+VOWELS = "AEIOU"
+PLAYER1 = 'Kevin'
+PLAYER2 = 'Stuart'
 
 
 def get_prefix_table(pattern):
@@ -41,76 +29,61 @@ def get_prefix_table(pattern):
     pattern_length = len(pattern)
     for i in range(1, pattern_length):
         j = 0
-        while pattern[i] == pattern[j] and j < pattern_length:
-            j += 1
+        while j < pattern_length and j > 0:
+            if pattern[i] == pattern[j]:
+                j += 1
         table.append(j)
-
     return table
 
-def substring_index(needle, haystack):
-    prefix_table = get_prefix_table(needle)
+
+def substring_index(needle, haystack, prefixes):
     haystack_length = len(haystack)
-    i = 0
-    while i < haystack_length:
-        j = 0
-        while haystack[i+j] == needle[j]:
+    j = 0
+    for i in range(haystack_length):
+        while j > 0 and needle[j] != haystack[i]:
+            j = prefix_table[j - 1]
+        if needle[j] == haystack[i]:
             j += 1
             if len(needle) == j:
-                print("FIND {0}".format(i))
-                # return i
-                break
-                yield i
+                yield i - (j - 1)
+                i = i - (j - 1) + 1
+                j = prefixes[j - 1]
+    return None
 
-        prefix_length = prefix_table[j-1]
-        if prefix_length > 0:
-            i += prefix_length
-            j += prefix_length
+
+# input_word = "EQQAEAOQYEQEYYOEEQQYAOEEAQEEOOEYAYOEYAYAEOQYAAYAOYYOQAAYEQAOOAQEAEYAOEEQYYEEAOAOAEQOEYOAOEYOOAAOQEOYEAYYOEAOAQEYYEOQEEEYAOOAYOOAQAEOYOYAEOYQEEEOOQOEAOAAQAOQEYOQEAEAEOOOOQOYQOEQQYEEEYEEOQYYYOEQOQEYAYQQOYEEOAEQOEEEEAAEEYAAQAAQAAYOEAQAQYEYYYEAOYOQEQOOEQOYAYAEEYQAYYQYYAEAYOEYEAOQQQOYYYOYYOYYQYAOEOAOAOYEAAOEOEAEYQAEAQOEOYEEAQOAOQEYOEQOAQQEEYOOAQQOOEYQAQOEEOOOAAQOQEYYOEOOQOOAEYEOOAEQYQOAEYYYAQAYOEYOEYYEEOEEOAYAEEQEQOAAAYAEYQQAYOYQQOAEAOQOOYAEEOAEQAQEEQYOOEEAEEAAOYQYQAOEQYOYEQEAAOYAQAQYEAQEQEEOQQQYEYOQ"
+input_word = "BAANANAS"
+counted = set()
+length = len(input_word)
+result = {PLAYER1: 0, PLAYER2: 0}
+
+
+for i, letter in enumerate(input_word):
+    if letter in VOWELS:
+        player = PLAYER1
+    else:
+        player = PLAYER2
+    prefix_table = get_prefix_table(input_word)
+    for j in range(length-i):
+        score = 0
+        subst = input_word[i:j+i+1]
+        prefixes = prefix_table[i:j + i + 1]
+        if subst in counted:
+            continue
+        # score_gen = count_substrings(subst)
+        if j == 0:
+            score = input_word.count(subst)
         else:
-            i += 1
-        if i + j > haystack_length:
-            break
-    return -1
+            for s in substring_index(subst, input_word, prefixes):
+                score += 1
+        print(subst, score)
+        counted.add(subst)
+        result[player] += score
+    counted.add(letter)
 
-for i in substring_index("ANAN", "BANANAN"):
-# for i in substring_index("YBYBO", "YBOYYBYBOXYBYBO"):
-    print(i)
-
-#
-# def count_substrings(substring, main_str=input_word):
-#     # substring_re = '(?=({0}))'.format(re.escape(substring))
-#     # return len(re.findall(substring_re, main_str))
-#     start = 0
-#     while True:
-#         start = main_str.find(substring, start)
-#         if start == -1:
-#             return
-#         yield start
-#         start += 1
-#
-# for i, letter in enumerate(input_word):
-#     if letter in VOWELS:
-#         player = PLAYER1
-#     else:
-#         player = PLAYER2
-#
-#     for j in range(length-i):
-#         score = 0
-#         subst = input_word[i:j+i+1]
-#         if subst in counted:
-#             continue
-#         # score_gen = count_substrings(subst)
-#         for s in count_substrings(subst):
-#             score += 1
-#
-#         counted.add(subst)
-#         result[player] += score
-#     counted.add(letter)
-#
-# if result[PLAYER1] > result[PLAYER2]:
-#     print(PLAYER1, result[PLAYER1])
-# elif result[PLAYER1] < result[PLAYER2]:
-#     print(PLAYER2, result[PLAYER2])
-# else:
-#     print('Draw')
-
-
+if result[PLAYER1] > result[PLAYER2]:
+    print(PLAYER1, result[PLAYER1])
+elif result[PLAYER1] < result[PLAYER2]:
+    print(PLAYER2, result[PLAYER2])
+else:
+    print('Draw')
