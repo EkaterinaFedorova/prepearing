@@ -1,0 +1,9 @@
+# editor files
+.*.swp
+.vscode
+.idea
+
+# virtualenv
+.venv/
+venv/
+ENV/
